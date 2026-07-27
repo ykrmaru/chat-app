@@ -3,6 +3,12 @@ import type { User } from "firebase/auth";
 
 const user = useState<User | null>("user", () => null);
 const { login, logout } = useAuth();
+
+const { sendMessage } = useChat();
+
+const send = async () => {
+  await sendMessage("初めてのメッセージ");
+};
 </script>
 
 <template>
@@ -10,16 +16,26 @@ const { login, logout } = useAuth();
     <p>{{ user.displayName }}</p>
     <p>{{ user.email }}</p>
 
-    <button @click="logout">
-      Google Logout
-    </button>
+    <div>
+      <button @click="logout">
+        Google Logout
+      </button>
+    </div>
+
+    <div>
+      <button @click="send">
+        メッセージ送信
+      </button>
+    </div>
   </div>
 
   <div v-else>
-    未ログイン
+    <p>未ログイン</p>
 
-    <button @click="login">
-      Google Login
-    </button>
+    <div>
+      <button @click="login">
+        Google Login
+      </button>
+    </div>
   </div>
 </template>
