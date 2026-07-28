@@ -12,10 +12,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold text-blue-600">
-      Firebase Chat
-    </h1>
+  <div class="flex h-screen flex-col bg-gray-50">
+    <ChatHeader />
     <ChatMessageList />
     <ChatInput />
   </div>
