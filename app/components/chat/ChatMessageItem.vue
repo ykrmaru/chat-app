@@ -29,9 +29,16 @@ const formattedTime = computed(() => {
       ? 'rounded-2xl rounded-br-md bg-blue-500 text-white'
       : 'rounded-2xl rounded-bl-md bg-white'
       ">
-      <p class="mb-1 text-xs opacity-70">
-        {{ message.displayName }}
-      </p>
+      <div class="flex items-center gap-2" :class="isMine ? 'flex-row-reverse' : ''">
+        <img v-if="message.photoURL" :src="message.photoURL" :alt="message.displayName"
+          class="h-8 w-8 rounded-full object-cover">
+        <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-sm font-bold">
+          {{ message.displayName?.charAt(0) }}
+        </div>
+        <p class="text-sm font-semibold">
+          {{ message.displayName }}
+        </p>
+      </div>
       <p>
         {{ message.text }}
       </p>
