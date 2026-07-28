@@ -1,7 +1,15 @@
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+} from "firebase/firestore";
 
 import { useFirebase } from "./useFirebase";
 import { useAuth } from "./useAuth";
+import type { ChatMessage } from "~/types/chat";
 
 export const useChat = () => {
   const { db } = useFirebase();
@@ -21,7 +29,22 @@ export const useChat = () => {
     });
   };
 
+  const messages = useState<ChatMessage[]>("messages", () => []);
+
+  const subscribeMessages = () => {
+    const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+
+    return onSnapshot(q, (snapshot) => {
+      messages.value = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<ChatMessage, "id">),
+      }));
+    });
+  };
+
   return {
     sendMessage,
+    messages,
+    subscribeMessages,
   };
 };
