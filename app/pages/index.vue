@@ -1,31 +1,39 @@
 <script setup lang="ts">
-const { user, login } = useAuth();
-const { subscribeMessages } = useChat();
+const { user } = useAuth();
+const {
+  subscribeMessages,
+  clearMessages,
+} = useChat();
 
-onMounted(() => {
-  const unsubscribe = subscribeMessages();
+let unsubscribeMessages: (() => void) | null = null;
 
-  onUnmounted(() => {
-    unsubscribe();
-  });
+watch(
+  () => user.value?.uid ?? null,
+  (uid) => {
+    unsubscribeMessages?.();
+    unsubscribeMessages = null;
+
+    if (uid) {
+      unsubscribeMessages = subscribeMessages();
+    } else {
+      clearMessages();
+    }
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  unsubscribeMessages?.();
 });
-
 </script>
 
 <template>
-  <template v-if="user">
-    <div class="flex h-screen flex-col bg-gray-50">
-      <ChatHeader />
-      <ChatMessageList />
-      <ChatInput />
+  <div class="flex h-screen flex-col bg-gray-50">
+    <ChatHeader />
+    <ChatMessageList v-if="user" />
+    <div v-else class="flex h-screen items-center justify-center">
+      <p class="text-gray-600">チャットを見るにはログインしてください。</p>
     </div>
-  </template>
-
-  <template v-else>
-    <div class="flex h-screen items-center justify-center bg-gray-50">
-      <button class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700" @click="login">
-        Login
-      </button>
-    </div>
-  </template>
+    <ChatInput v-if="user" />
+  </div>
 </template>

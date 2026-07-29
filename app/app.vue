@@ -1,8 +1,14 @@
 <script setup lang="ts">
 const { init } = useAuth();
 
+let unsubscribeAuth: (() => void) | null = null;
+
 onMounted(() => {
-  init();
+  unsubscribeAuth = init();
+});
+
+onUnmounted(() => {
+  unsubscribeAuth?.();
 });
 </script>
 

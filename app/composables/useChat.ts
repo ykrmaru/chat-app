@@ -71,10 +71,15 @@ export const useChat = () => {
     });
   };
 
+  const clearMessages = () => {
+    messages.value = [];
+  };
+
   return {
     sendMessage,
     messages,
     chatItems,
     subscribeMessages,
+    clearMessages,
   };
 };
