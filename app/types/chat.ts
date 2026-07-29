@@ -8,3 +8,13 @@ export type ChatMessage = {
   photoURL: string | null;
   createdAt: Timestamp | null;
 };
+
+export type ChatItem =
+  | {
+      type: "separator";
+      date: string;
+    }
+  | {
+      type: "message";
+      message: ChatMessage;
+    };

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
 
-const { messages } = useChat();
+const { messages, chatItems } = useChat();
 
 const messageListRef = ref<HTMLElement | null>(null);
 
@@ -20,6 +20,12 @@ watch(
 
 <template>
   <main ref="messageListRef" class="flex-1 overflow-y-auto p-6">
-    <ChatMessageItem v-for="message in messages" :key="message.id" :message="message" />
+    <template v-for="item in chatItems" :key="item.type === 'separator'
+      ? `separator-${item.date}`
+      : item.message.id
+      ">
+      <ChatDateSeparator v-if="item.type === 'separator'" :date="item.date" />
+      <ChatMessageItem v-else :message="item.message" />
+    </template>
   </main>
 </template>

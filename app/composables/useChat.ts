@@ -9,7 +9,7 @@ import {
 
 import { useFirebase } from "./useFirebase";
 import { useAuth } from "./useAuth";
-import type { ChatMessage } from "~/types/chat";
+import type { ChatItem, ChatMessage } from "~/types/chat";
 
 export const useChat = () => {
   const { db } = useFirebase();
@@ -31,6 +31,35 @@ export const useChat = () => {
 
   const messages = useState<ChatMessage[]>("messages", () => []);
 
+  const chatItems = computed<ChatItem[]>(() => {
+    const items: ChatItem[] = [];
+
+    let previousDate = "";
+
+    for (const message of messages.value) {
+      if (!message.createdAt) continue;
+
+      const formatDate = (date: Date) => date.toLocaleDateString("ja-JP");
+      const date = formatDate(message.createdAt.toDate());
+
+      if (date !== previousDate) {
+        items.push({
+          type: "separator",
+          date,
+        });
+
+        previousDate = date;
+      }
+
+      items.push({
+        type: "message",
+        message,
+      });
+    }
+
+    return items;
+  });
+
   const subscribeMessages = () => {
     const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
 
@@ -45,6 +74,7 @@ export const useChat = () => {
   return {
     sendMessage,
     messages,
+    chatItems,
     subscribeMessages,
   };
 };
