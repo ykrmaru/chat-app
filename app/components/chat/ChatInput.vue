@@ -4,6 +4,7 @@ import { PaperAirplaneIcon } from "@heroicons/vue/24/solid";
 const text = ref("");
 const isSending = ref(false);
 const isComposing = ref(false);
+const errorMessage = ref("");
 
 const { sendMessage } = useChat();
 
@@ -19,8 +20,10 @@ const handleSubmit = async () => {
   try {
     await sendMessage(value);
     text.value = "";
+    errorMessage.value = "";
   } catch (error) {
     console.error(error);
+    errorMessage.value = "メッセージの送信に失敗しました。";
   } finally {
     isSending.value = false;
   }
@@ -48,6 +51,9 @@ const handleKeyDown = async (event: KeyboardEvent) => {
 
 <template>
   <form class="flex items-center gap-4 border-t border-gray-200 bg-white p-4" @submit.prevent="handleSubmit">
+    <p v-if="errorMessage" class="px-4 pb-2 text-sm text-red-600">
+      {{ errorMessage }}
+    </p>
     <textarea v-model="text" rows="2" placeholder="メッセージを入力..."
       class="w-full resize-none rounded-xl border px-4 py-3 outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
       @keydown="handleKeyDown" @compositionstart="isComposing = true" @compositionend="isComposing = false"
