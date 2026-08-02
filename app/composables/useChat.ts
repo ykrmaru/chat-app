@@ -44,6 +44,11 @@ export const useChat = () => {
 
   const hasMoreMessages = useState("hasMoreMessages", () => true);
 
+  const isInitialLoadingMessages = useState(
+    "isInitialLoadingMessages",
+    () => false,
+  );
+
   const toChatMessage = (
     document: QueryDocumentSnapshot<DocumentData>,
   ): ChatMessage => ({
@@ -182,15 +187,22 @@ export const useChat = () => {
     hasMoreMessages.value = true;
     messages.value = [];
 
-    await fetchInitialMessages();
+    isInitialLoadingMessages.value = true;
 
-    return subscribeMessages();
+    try {
+      await fetchInitialMessages();
+
+      return subscribeMessages();
+    } finally {
+      isInitialLoadingMessages.value = false;
+    }
   };
 
   const clearMessages = () => {
     messages.value = [];
     oldestDocument = null;
     hasMoreMessages.value = true;
+    isInitialLoadingMessages.value = false;
   };
 
   return {
@@ -199,6 +211,7 @@ export const useChat = () => {
     chatItems,
     isLoadingMessages,
     hasMoreMessages,
+    isInitialLoadingMessages,
     initMessages,
     fetchOlderMessages,
     clearMessages,

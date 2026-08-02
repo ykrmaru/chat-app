@@ -4,13 +4,19 @@ const { user, isAuthInitialized } = useAuth();
 const {
   initMessages,
   clearMessages,
+  isInitialLoadingMessages,
 } = useChat();
 
 let unsubscribeMessages: (() => void) | null = null;
 
 watch(
-  () => user.value?.uid ?? null,
-  async (uid) => {
+  [
+    () => isAuthInitialized.value,
+    () => user.value?.uid ?? null,
+  ],
+  async ([initialized, uid]) => {
+    if (!initialized) return;
+
     unsubscribeMessages?.();
     unsubscribeMessages = null;
 
@@ -20,7 +26,7 @@ watch(
       clearMessages();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onUnmounted(() => {
@@ -32,18 +38,23 @@ onUnmounted(() => {
   <div class="flex h-screen flex-col bg-gray-50">
     <ChatHeader />
 
-    <!-- 認証確認中 -->
+    <!-- Firebase Authの確認中 -->
     <div v-if="!isAuthInitialized" class="flex flex-1 items-center justify-center">
       <AppSpinner :size="32" />
     </div>
 
     <!-- ログイン済み -->
     <template v-else-if="user">
-      <ChatMessageList />
+      <!-- 初回メッセージ取得中 -->
+      <ChatMessageListSkeleton v-if="isInitialLoadingMessages" />
+
+      <!-- 初回取得完了 -->
+      <ChatMessageList v-else />
+
       <ChatInput />
     </template>
 
-    <!-- 認証確認完了かつ未ログイン -->
+    <!-- 未ログイン -->
     <div v-else class="flex flex-1 items-center justify-center">
       <p class="text-gray-600">
         チャットを見るにはログインしてください。
