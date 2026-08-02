@@ -40,7 +40,7 @@ onUnmounted(() => {
 
     <!-- Firebase Authの確認中 -->
     <div v-if="!isAuthInitialized" class="flex flex-1 items-center justify-center">
-      <AppSpinner :size="32" />
+      <CommonAppSpinner :size="32" />
     </div>
 
     <!-- ログイン済み -->

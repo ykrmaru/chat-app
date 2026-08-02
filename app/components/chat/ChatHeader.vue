@@ -7,8 +7,8 @@ const { user, logout, login, isAuthInitialized } = useAuth();
     <h1 class="text-xl font-bold">
       Firebase Chat
     </h1>
-    <div v-if="!isAuthInitialized" class="flex h-screen items-center justify-center">
-      <AppSpinner :size="32" />
+    <div v-if="!isAuthInitialized" class="flex h-screen items-center justify-center min-w-24">
+      <CommonAppSpinner :size="24" />
     </div>
     <div v-else-if="user" class="flex items-center gap-4">
       <span class="text-sm text-gray-600">
