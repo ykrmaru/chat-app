@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 
 const {
   chatItems,
@@ -9,6 +15,32 @@ const {
 } = useChat();
 
 const messageListRef = ref<HTMLElement | null>(null);
+
+const scrollToBottom = async () => {
+  await nextTick();
+
+  const element = messageListRef.value;
+
+  if (!element) return;
+
+  element.scrollTop = element.scrollHeight;
+};
+
+/**
+ * 一覧末尾にある最新メッセージのID
+ *
+ * 過去メッセージを先頭へ追加しても、この値は変わらないため、
+ * 無限スクロール時に一番下へ戻されるのを防げます。
+ */
+const latestMessageId = computed(() => {
+  const latestItem = chatItems.value.at(-1);
+
+  if (!latestItem || latestItem.type !== "message") {
+    return null;
+  }
+
+  return latestItem.message.id;
+});
 
 const handleScroll = async () => {
   const element = messageListRef.value;
@@ -22,30 +54,26 @@ const handleScroll = async () => {
     return;
   }
 
-  const previousScrollHeight =
-    element.scrollHeight;
+  const previousScrollHeight = element.scrollHeight;
 
   await fetchOlderMessages();
   await nextTick();
 
-  const newScrollHeight =
-    element.scrollHeight;
+  const newScrollHeight = element.scrollHeight;
 
-  element.scrollTop =
-    newScrollHeight - previousScrollHeight;
+  // 過去データ追加前に見ていた位置を維持する
+  element.scrollTop = newScrollHeight - previousScrollHeight;
 };
 
-watch(
-  () => chatItems.value.length,
-  async () => {
-    await nextTick();
+// リロード後・初回表示時
+onMounted(() => {
+  void scrollToBottom();
+});
 
-    if (!messageListRef.value) return;
-
-    messageListRef.value.scrollTop =
-      messageListRef.value.scrollHeight;
-  }
-);
+// 新しいメッセージが末尾へ追加されたとき
+watch(latestMessageId, () => {
+  void scrollToBottom();
+});
 </script>
 
 <template>
@@ -57,11 +85,13 @@ watch(
     <p v-else-if="!hasMoreMessages" class="py-4 text-center text-xs text-gray-400">
       これより前のメッセージはありません
     </p>
+
     <template v-for="item in chatItems" :key="item.type === 'separator'
-      ? `separator-${item.date}`
-      : item.message.id
+        ? `separator-${item.date}`
+        : item.message.id
       ">
       <ChatDateSeparator v-if="item.type === 'separator'" :date="item.date" />
+
       <ChatMessageItem v-else :message="item.message" />
     </template>
   </main>
