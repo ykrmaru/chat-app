@@ -1,20 +1,23 @@
 <script setup lang="ts">
 const { user } = useAuth();
 const {
-  subscribeMessages,
+  initMessages,
   clearMessages,
 } = useChat();
 
-let unsubscribeMessages: (() => void) | null = null;
+let unsubscribeMessages:
+  | (() => void)
+  | null = null;
 
 watch(
   () => user.value?.uid ?? null,
-  (uid) => {
+  async (uid) => {
     unsubscribeMessages?.();
     unsubscribeMessages = null;
 
     if (uid) {
-      unsubscribeMessages = subscribeMessages();
+      unsubscribeMessages =
+        await initMessages();
     } else {
       clearMessages();
     }
@@ -22,6 +25,9 @@ watch(
   { immediate: true }
 );
 
+onUnmounted(() => {
+  unsubscribeMessages?.();
+});
 onUnmounted(() => {
   unsubscribeMessages?.();
 });

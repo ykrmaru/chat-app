@@ -1,15 +1,24 @@
 import {
   addDoc,
   collection,
+  getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  startAfter,
+  type DocumentData,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
 
 import { useFirebase } from "./useFirebase";
 import { useAuth } from "./useAuth";
 import type { ChatItem, ChatMessage } from "~/types/chat";
+
+const PAGE_SIZE = 20;
+
+let oldestDocument: QueryDocumentSnapshot<DocumentData> | null = null;
 
 export const useChat = () => {
   const { db } = useFirebase();
@@ -31,6 +40,74 @@ export const useChat = () => {
 
   const messages = useState<ChatMessage[]>("messages", () => []);
 
+  const isLoadingMessages = useState("isLoadingMessages", () => false);
+
+  const hasMoreMessages = useState("hasMoreMessages", () => true);
+
+  const toChatMessage = (
+    document: QueryDocumentSnapshot<DocumentData>,
+  ): ChatMessage => ({
+    id: document.id,
+    ...(document.data() as Omit<ChatMessage, "id">),
+  });
+
+  const fetchInitialMessages = async () => {
+    if (isLoadingMessages.value) return;
+
+    isLoadingMessages.value = true;
+
+    try {
+      const messagesQuery = query(
+        collection(db, "messages"),
+        orderBy("createdAt", "desc"),
+        limit(PAGE_SIZE),
+      );
+
+      const snapshot = await getDocs(messagesQuery);
+
+      const fetchedMessages = snapshot.docs.map(toChatMessage).reverse();
+
+      messages.value = fetchedMessages;
+
+      oldestDocument = snapshot.docs.at(-1) ?? null;
+
+      hasMoreMessages.value = snapshot.size === PAGE_SIZE;
+    } finally {
+      isLoadingMessages.value = false;
+    }
+  };
+
+  const fetchOlderMessages = async () => {
+    if (isLoadingMessages.value || !hasMoreMessages.value || !oldestDocument) {
+      return;
+    }
+
+    isLoadingMessages.value = true;
+
+    try {
+      const messagesQuery = query(
+        collection(db, "messages"),
+        orderBy("createdAt", "desc"),
+        startAfter(oldestDocument),
+        limit(PAGE_SIZE),
+      );
+
+      const snapshot = await getDocs(messagesQuery);
+
+      const olderMessages = snapshot.docs.map(toChatMessage).reverse();
+
+      messages.value = [...olderMessages, ...messages.value];
+
+      oldestDocument = snapshot.docs.at(-1) ?? oldestDocument;
+
+      hasMoreMessages.value = snapshot.size === PAGE_SIZE;
+    } finally {
+      isLoadingMessages.value = false;
+    }
+  };
+
+  const formatDate = (date: Date) => date.toLocaleDateString("ja-JP");
+
   const chatItems = computed<ChatItem[]>(() => {
     const items: ChatItem[] = [];
 
@@ -39,7 +116,6 @@ export const useChat = () => {
     for (const message of messages.value) {
       if (!message.createdAt) continue;
 
-      const formatDate = (date: Date) => date.toLocaleDateString("ja-JP");
       const date = formatDate(message.createdAt.toDate());
 
       if (date !== previousDate) {
@@ -61,25 +137,70 @@ export const useChat = () => {
   });
 
   const subscribeMessages = () => {
-    const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+    const latestMessagesQuery = query(
+      collection(db, "messages"),
+      orderBy("createdAt", "desc"),
+      limit(PAGE_SIZE),
+    );
 
-    return onSnapshot(q, (snapshot) => {
-      messages.value = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Omit<ChatMessage, "id">),
-      }));
-    });
+    return onSnapshot(
+      latestMessagesQuery,
+      (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type !== "added" && change.type !== "modified") {
+            continue;
+          }
+
+          const message = toChatMessage(change.doc);
+
+          const index = messages.value.findIndex(
+            (item) => item.id === message.id,
+          );
+
+          if (index === -1) {
+            messages.value = [...messages.value, message];
+          } else {
+            messages.value[index] = message;
+          }
+        }
+
+        messages.value.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
+          const bTime = b.createdAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
+
+          return aTime - bTime;
+        });
+      },
+      (error) => {
+        console.error("メッセージの購読に失敗しました。", error);
+      },
+    );
+  };
+
+  const initMessages = async () => {
+    oldestDocument = null;
+    hasMoreMessages.value = true;
+    messages.value = [];
+
+    await fetchInitialMessages();
+
+    return subscribeMessages();
   };
 
   const clearMessages = () => {
     messages.value = [];
+    oldestDocument = null;
+    hasMoreMessages.value = true;
   };
 
   return {
     sendMessage,
     messages,
     chatItems,
-    subscribeMessages,
+    isLoadingMessages,
+    hasMoreMessages,
+    initMessages,
+    fetchOlderMessages,
     clearMessages,
   };
 };
