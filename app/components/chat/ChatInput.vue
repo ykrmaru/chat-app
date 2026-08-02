@@ -50,20 +50,26 @@ const handleKeyDown = async (event: KeyboardEvent) => {
 </script>
 
 <template>
-  <form class="flex items-center gap-4 border-t border-gray-200 bg-white p-4" @submit.prevent="handleSubmit">
+  <form class="flex items-center gap-2 border-t border-gray-200 bg-white p-2 sm:gap-4 sm:p-4"
+    @submit.prevent="handleSubmit">
     <p v-if="errorMessage" class="px-4 pb-2 text-sm text-red-600">
       {{ errorMessage }}
     </p>
-    <textarea v-model="text" rows="2" placeholder="メッセージを入力..."
-      class="w-full resize-none rounded-xl border px-4 py-3 outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
-      @keydown="handleKeyDown" @compositionstart="isComposing = true" @compositionend="isComposing = false"
-      :disabled="isSending"></textarea>
-    <button type="submit"
-      class="flex min-w-36 gap-1.5 items-center justify-center rounded bg-blue-600 px-6 py-2 text-white disabled:cursor-not-allowed disabled:bg-blue-300"
-      :disabled="isSending">
+    <textarea v-model="text" rows="2" placeholder="メッセージを入力..." class="
+      min-w-0 flex-1 resize-none rounded-xl border px-3 py-3
+      outline-none focus:border-blue-500
+      disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500
+      sm:px-4
+    " :disabled="isSending" @keydown="handleKeyDown" @compositionstart="isComposing = true"
+      @compositionend="isComposing = false" />
+    <button type="submit" class="flex h-11 w-11 items-center justify-center rounded bg-blue-600 text-white
+      disabled:cursor-not-allowed disabled:bg-blue-300
+      sm:h-auto sm:w-auto sm:min-w-28 sm:px-5 sm:py-2 sm:gap-2" :disabled="isSending">
       <CommonAppSpinner v-if="isSending" :size="18" />
       <PaperAirplaneIcon v-else class="h-5 w-5" />
-      {{ isSending ? "送信中…" : "送信" }}
+      <span class="hidden whitespace-nowrap sm:inline">
+        {{ isSending ? "送信中…" : "送信" }}
+      </span>
     </button>
   </form>
 </template>
