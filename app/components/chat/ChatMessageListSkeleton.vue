@@ -1,43 +1,47 @@
 <template>
   <main class="min-h-0 flex-1 overflow-hidden p-6" aria-label="メッセージを読み込み中" aria-busy="true">
-    <div class="animate-pulse space-y-6">
-      <div class="flex items-start gap-3">
-        <div class="h-10 w-10 shrink-0 rounded-full bg-gray-200" />
-
-        <div class="space-y-2">
-          <div class="h-3 w-20 rounded bg-gray-200" />
-          <div class="h-16 w-64 max-w-[60vw] rounded-2xl rounded-bl-md bg-gray-200" />
-        </div>
-      </div>
-
-      <div class="flex justify-end">
-        <div class="flex flex-row-reverse items-start gap-3">
-          <div class="h-10 w-10 shrink-0 rounded-full bg-gray-200" />
-
-          <div class="space-y-2">
-            <div class="ml-auto h-3 w-16 rounded bg-gray-200" />
-            <div class="h-20 w-72 max-w-[60vw] rounded-2xl rounded-br-md bg-gray-200" />
+    <div class="animate-pulse">
+      <!-- 相手側 -->
+      <div class="mb-4 flex justify-start">
+        <div class="w-72 max-w-[70%] rounded-2xl rounded-bl-md bg-white px-4 py-3 shadow">
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 shrink-0 rounded-full bg-gray-200" />
+            <div class="h-4 w-24 rounded bg-gray-200" />
           </div>
+
+          <div class="mt-3 h-4 w-52 rounded bg-gray-200" />
+          <div class="mt-2 h-4 w-36 rounded bg-gray-200" />
+
+          <div class="mt-3 ml-auto h-3 w-12 rounded bg-gray-200" />
         </div>
       </div>
 
-      <div class="flex items-start gap-3">
-        <div class="h-10 w-10 shrink-0 rounded-full bg-gray-200" />
-
-        <div class="space-y-2">
-          <div class="h-3 w-24 rounded bg-gray-200" />
-          <div class="h-12 w-48 max-w-[60vw] rounded-2xl rounded-bl-md bg-gray-200" />
-        </div>
-      </div>
-
-      <div class="flex justify-end">
-        <div class="flex flex-row-reverse items-start gap-3">
-          <div class="h-10 w-10 shrink-0 rounded-full bg-gray-200" />
-
-          <div class="space-y-2">
-            <div class="ml-auto h-3 w-20 rounded bg-gray-200" />
-            <div class="h-24 w-60 max-w-[60vw] rounded-2xl rounded-br-md bg-gray-200" />
+      <!-- 自分側 -->
+      <div class="mb-4 flex justify-end">
+        <div class="w-64 max-w-[70%] rounded-2xl rounded-br-md bg-blue-200 px-4 py-3 shadow">
+          <div class="flex flex-row-reverse items-center gap-2">
+            <div class="h-8 w-8 shrink-0 rounded-full bg-blue-100" />
+            <div class="h-4 w-20 rounded bg-blue-100" />
           </div>
+
+          <div class="mt-3 h-4 w-44 rounded bg-blue-100" />
+          <div class="mt-2 h-4 w-28 rounded bg-blue-100" />
+
+          <div class="mt-3 ml-auto h-3 w-12 rounded bg-blue-100" />
+        </div>
+      </div>
+
+      <!-- 相手側 -->
+      <div class="mb-4 flex justify-start">
+        <div class="w-60 max-w-[70%] rounded-2xl rounded-bl-md bg-white px-4 py-3 shadow">
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 shrink-0 rounded-full bg-gray-200" />
+            <div class="h-4 w-16 rounded bg-gray-200" />
+          </div>
+
+          <div class="mt-3 h-4 w-40 rounded bg-gray-200" />
+
+          <div class="mt-3 ml-auto h-3 w-12 rounded bg-gray-200" />
         </div>
       </div>
     </div>
