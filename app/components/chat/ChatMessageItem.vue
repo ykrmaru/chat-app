@@ -39,7 +39,7 @@ const formattedTime = computed(() => {
           {{ message.displayName }}
         </p>
       </div>
-      <p>
+      <p class="whitespace-pre-wrap break-words leading-relaxed">
         {{ message.text }}
       </p>
       <p class="mt-2 text-right text-xs opacity-70">
